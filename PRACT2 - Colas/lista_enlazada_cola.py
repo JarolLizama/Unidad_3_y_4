@@ -1,18 +1,14 @@
 # ============================================================
-#  cola.py  –  Implementación de una Cola con lista enlazada
+#  cola_interactiva.py  –  Cola con menú interactivo
 # ============================================================
 
 
-# --------------------------------------------------------------
-#  Clase Node
-# --------------------------------------------------------------
-
 class Node:
-    """Nodo de la lista enlazada. Guarda el objeto y un puntero al siguiente nodo."""
+    """Nodo de la lista enlazada."""
 
     def __init__(self, info):
-        self.info = info      # Objeto almacenado en el nodo
-        self.next = None      # Referencia al siguiente nodo (None si es el último)
+        self.info = info
+        self.next = None
 
     def get_info(self):
         return self.info
@@ -24,12 +20,8 @@ class Node:
         self.next = next_node
 
 
-# --------------------------------------------------------------
-#  Clase Order (traducción directa del Java del enunciado)
-# --------------------------------------------------------------
-
 class Order:
-    """Representa un pedido con cliente y cantidad de producto."""
+    """Representa un pedido con cliente y cantidad."""
 
     def __init__(self, qtty: int, customer: str):
         self.customer = customer
@@ -47,164 +39,176 @@ class Order:
         return self.customer
 
 
-# --------------------------------------------------------------
-#  Clase Queue  (implementa la interfaz QueueInterface del enunciado)
-# --------------------------------------------------------------
-
 class Queue:
-    """
-    Cola (FIFO) implementada sobre una lista enlazada.
-
-    Atributos internos:
-        _top   – Puntero a la cabeza (primer elemento en salir).
-        _tail  – Puntero al último nodo (donde se insertan nuevos elementos).
-        _size  – Número de elementos en la cola.
-
-    Métodos públicos:
-        size()           – Número de elementos.
-        is_empty()       – True si la cola está vacía.
-        front()          – Primer elemento sin extraerlo (None si vacía).
-        enqueue(info)    – Añade un elemento al final.
-        dequeue()        – Extrae y devuelve el primer elemento (None si vacía).
-        get_nth(pos)     – Devuelve el n-ésimo elemento sin borrarlo (None si inválido).
-        print_info()     – Muestra el contenido completo de la cola.
-    """
+    """Cola FIFO implementada con lista enlazada."""
 
     def __init__(self):
-        self._top = None    # Cabeza de la cola (extracción)
-        self._tail = None   # Cola de la cola (inserción)
+        self._top = None
+        self._tail = None
         self._size = 0
 
-    # ----------------------------------------------------------
-    def size(self) -> int:
-        """Devuelve el número de elementos en la cola."""
+    def size(self):
         return self._size
 
-    # ----------------------------------------------------------
-    def is_empty(self) -> bool:
-        """True si la cola no contiene ningún elemento."""
+    def is_empty(self):
         return self._top is None
 
-    # ----------------------------------------------------------
     def front(self):
-        """
-        Devuelve el primer elemento SIN extraerlo.
-        Devuelve None si la cola está vacía.
-        """
         if self.is_empty():
             return None
         return self._top.get_info()
 
-    # ----------------------------------------------------------
     def enqueue(self, info):
-        """Añade un nuevo elemento al final de la cola."""
+        """Añade un elemento al final de la cola."""
         new_node = Node(info)
         if self.is_empty():
-            # La cola estaba vacía: top y tail apuntan al mismo nodo
             self._top = new_node
             self._tail = new_node
         else:
-            # Enlazamos el nuevo nodo tras el último y actualizamos tail
             self._tail.set_next(new_node)
             self._tail = new_node
         self._size += 1
 
-    # ----------------------------------------------------------
     def dequeue(self):
-        """
-        Extrae y devuelve el primer elemento.
-        Devuelve None si la cola está vacía.
-        """
+        """Extrae y devuelve el primer elemento. None si está vacía."""
         if self.is_empty():
             return None
         info = self._top.get_info()
-        self._top = self._top.get_next()   # Avanzamos la cabeza
+        self._top = self._top.get_next()
         if self._top is None:
-            # La cola quedó vacía; tail también debe resetearse
             self._tail = None
         self._size -= 1
         return info
 
-    # ----------------------------------------------------------
     def get_nth(self, pos: int):
-        """
-        Devuelve el n-ésimo elemento (base 1) sin eliminarlo.
-        Devuelve None si la posición no es válida.
-        """
+        """Devuelve el n-ésimo elemento sin borrarlo. None si posición inválida."""
         if pos < 1 or pos > self._size:
             return None
         node = self._top
-        for _ in range(pos - 1):       # Avanzamos (pos-1) veces
+        for _ in range(pos - 1):
             node = node.get_next()
         return node.get_info()
 
-    # ----------------------------------------------------------
     def print_info(self):
-        """Muestra en consola el número de elementos y el detalle de cada uno."""
-        print("********* QUEUE DUMP *********")
+        """Muestra el contenido completo de la cola."""
+        if self.is_empty():
+            print("\n  [ La cola está vacía ]")
+            return
+        print("\n********* QUEUE DUMP *********")
         print(f"   Size: {self._size}")
         node = self._top
         count = 1
         while node is not None:
             print(f"   ** Element {count}")
-            # Si el objeto almacenado es un Order, usamos su método print_info
-            if hasattr(node.get_info(), "print_info"):
-                node.get_info().print_info()
-            else:
-                print(f"     Value: {node.get_info()}")
-                print( "     ------------")
+            node.get_info().print_info()
             node = node.get_next()
             count += 1
-        print("******************************")
+        print("******************************\n")
 
 
-# ==============================================================
-#  TestQueue – clase de prueba (equivalente al main de Java)
-# ==============================================================
+# ============================================================
+#  Funciones del menú
+# ============================================================
 
-if __name__ == "__main__":
+def pedir_entero(mensaje: str) -> int:
+    """Pide un número entero al usuario, repitiendo si el input no es válido."""
+    while True:
+        try:
+            return int(input(mensaje))
+        except ValueError:
+            print("  ⚠ Por favor, introduce un número entero.")
+
+
+def insertar_n_pedidos(cola: Queue):
+    """Pregunta cuántos pedidos insertar y los añade uno a uno."""
+    n = pedir_entero("¿Cuántos pedidos quieres insertar? ")
+    for i in range(1, n + 1):
+        print(f"\n  -- Pedido {i} --")
+        customer = input("  Nombre del cliente: ").strip()
+        qtty = pedir_entero("  Cantidad: ")
+        cola.enqueue(Order(qtty, customer))
+        print(f"  ✔ Pedido de '{customer}' añadido a la cola.")
+    cola.print_info()
+
+
+def eliminar_n_pedidos(cola: Queue):
+    """Pregunta cuántos pedidos eliminar y los extrae del frente."""
+    if cola.is_empty():
+        print("\n  ⚠ La cola está vacía, no hay nada que eliminar.")
+        return
+    n = pedir_entero(f"¿Cuántos pedidos quieres eliminar? (hay {cola.size()}): ")
+    if n <= 0:
+        print("  ⚠ Debes indicar al menos 1.")
+        return
+    eliminados = 0
+    for _ in range(n):
+        order = cola.dequeue()
+        if order is None:
+            print("  ⚠ La cola se vació antes de completar las eliminaciones.")
+            break
+        print(f"  ✔ Eliminado → Customer: {order.get_customer()}, Quantity: {order.get_qtty()}")
+        eliminados += 1
+    print(f"\n  Se eliminaron {eliminados} pedido(s).")
+    cola.print_info()
+
+
+def ver_nesimo(cola: Queue):
+    """Muestra el n-ésimo elemento sin eliminarlo."""
+    if cola.is_empty():
+        print("\n  ⚠ La cola está vacía.")
+        return
+    pos = pedir_entero(f"¿Qué posición quieres consultar? (1 a {cola.size()}): ")
+    order = cola.get_nth(pos)
+    if order is None:
+        print(f"  ⚠ Posición {pos} no válida.")
+    else:
+        print(f"\n  Elemento en posición {pos}:")
+        order.print_info()
+
+
+def ver_primero(cola: Queue):
+    """Muestra el primer elemento sin extraerlo."""
+    order = cola.front()
+    if order is None:
+        print("\n  ⚠ La cola está vacía.")
+    else:
+        print(f"\n  Primer elemento (front):")
+        order.print_info()
+
+
+# ============================================================
+#  Menú principal
+# ============================================================
+
+def menu():
     cola = Queue()
 
-    # --- Creamos los pedidos ---
-    o1 = Order(20, "cust1")
-    o2 = Order(30, "cust2")
-    o3 = Order(40, "cust3")
-    o4 = Order(50, "cust3")
+    opciones = {
+        "1": ("Insertar N pedidos",    lambda: insertar_n_pedidos(cola)),
+        "2": ("Eliminar N pedidos",    lambda: eliminar_n_pedidos(cola)),
+        "3": ("Ver primer elemento",   lambda: ver_primero(cola)),
+        "4": ("Ver n-ésimo elemento",  lambda: ver_nesimo(cola)),
+        "5": ("Ver cola completa",     lambda: cola.print_info()),
+        "6": ("Salir",                 None),
+    }
 
-    # --- Insertamos en la cola ---
-    print(">> enqueue(o1)")
-    cola.enqueue(o1)
-    cola.print_info()
+    while True:
+        print("\n========== MENÚ COLA ==========")
+        for clave, (desc, _) in opciones.items():
+            print(f"  {clave}. {desc}")
+        print("================================")
 
-    print(">> enqueue(o2)")
-    cola.enqueue(o2)
-    cola.print_info()
+        opcion = input("Elige una opción: ").strip()
 
-    print(">> enqueue(o3)")
-    cola.enqueue(o3)
-    cola.print_info()
+        if opcion == "6":
+            print("Saliendo... ¡hasta luego!")
+            break
+        elif opcion in opciones:
+            _, accion = opciones[opcion]
+            accion()
+        else:
+            print("  ⚠ Opción no válida, intenta de nuevo.")
 
-    print(">> enqueue(o4)")
-    cola.enqueue(o4)
-    cola.print_info()
 
-    # --- Probamos front (no extrae) ---
-    print(">> front()  →  Customer:", cola.front().get_customer())
-    cola.print_info()
-
-    # --- Probamos dequeue (extrae el primero) ---
-    extraido = cola.dequeue()
-    print(f">> dequeue() → Customer: {extraido.get_customer()}, Quantity: {extraido.get_qtty()}")
-    cola.print_info()
-
-    # --- Probamos get_nth ---
-    # La cola ahora tiene 3 elementos (o2, o3, o4); pedimos el 2.º
-    tercero = cola.get_nth(2)
-    if tercero:
-        print(f">> get_nth(2) → Customer: {tercero.get_customer()}, Quantity: {tercero.get_qtty()}")
-    else:
-        print(">> get_nth(2) → posición no válida")
-
-    # Posición fuera de rango
-    invalido = cola.get_nth(10)
-    print(f">> get_nth(10) → {invalido}")   # None
+if __name__ == "__main__":
+    menu()
