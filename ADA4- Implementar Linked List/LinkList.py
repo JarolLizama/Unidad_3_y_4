@@ -1,20 +1,3 @@
-"""
-╔══════════════════════════════════════════════════════════════════╗
-║           MyLinkedList — Visualizador Educativo                  ║
-║                                                                  ║
-║  ¿Qué es una Linked List (Lista Enlazada)?                       ║
-║  Es una estructura de datos donde cada elemento (NODO) guarda:   ║
-║    1. El DATO  → el valor que almacena (ej: 10, "hola")          ║
-║    2. El PUNTERO → una "flecha" que apunta al siguiente nodo     ║
-║                                                                  ║
-║  Se ve así en memoria:                                           ║
-║  HEAD → [10|→] → [20|→] → [30|→] → [40|None]                   ║
-║                                                                  ║
-║  HEAD = cabeza = primer nodo de la lista                         ║
-║  None = el último nodo no apunta a nadie (fin de la lista)       ║
-╚══════════════════════════════════════════════════════════════════╝
-"""
-
 import tkinter as tk
 import time
 
